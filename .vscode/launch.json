@@ -1,0 +1,50 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/server/src/index.js",
+            "cwd": "${workspaceFolder}/server",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "Debug Client (Vite + Chrome)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev",
+                "--workspace=client"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "serverReadyAction": {
+                "pattern": "Local:\\s+(https?://\\S+)",
+                "uriFormat": "%s",
+                "webRoot": "${workspaceFolder}/client",
+                "action": "debugWithChrome"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug Client and Server",
+            "configurations": [
+                "Debug Server",
+                "Debug Client (Vite + Chrome)"
+            ],
+            "stopAll": true
+        }
+    ]
+}
