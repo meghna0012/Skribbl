@@ -5,6 +5,17 @@ import { createPlayer, makeRoomCode, Room } from './models/Room.js';
 // Rooms die with the process. A Map is the whole database: lookup by code is O(1),
 // and there is nothing to persist after the last player leaves.
 const rooms = new Map();
+const BROWSE_LIMIT = 10;
+let onRoomsChanged = () => {};
+
+// What: let the socket layer push a fresh browse list after any roster change.
+export function setRoomsChangedListener(fn) {
+  onRoomsChanged = typeof fn === 'function' ? fn : () => {};
+}
+
+function notifyRoomsChanged() {
+  onRoomsChanged();
+}
 
 // What: find a room from a code the user typed.
 // Why: codes are generated in uppercase. Lowercasing the lookup means "ab12cd" still joins.
@@ -48,9 +59,27 @@ export function createRoom({ hostName, settings, socketId }) {
   const id = uniqueCode();
   const player = createPlayer(name, socketId);
   const room = new Room(id, player, clampSettings(settings));
-  room.onEmpty = () => rooms.delete(id);
+  room.onChange = notifyRoomsChanged;
+  room.onEmpty = () => {
+    rooms.delete(id);
+    notifyRoomsChanged();
+  };
   rooms.set(id, room);
+  notifyRoomsChanged();
   return { room, player };
+}
+
+// What: up to 10 listed rooms a home-screen client can join.
+// Why: rooms are invite-code rooms, not a public matchmaking pool. Hosts can
+// uncheck "List in Browse" to stay code-only. Full rooms waste a slot.
+export function listBrowsableRooms() {
+  const listed = [];
+  for (const room of rooms.values()) {
+    if (room.settings.listed === false) continue;
+    if (room.players.size >= room.settings.maxPlayers) continue;
+    listed.push(room.toBrowse());
+  }
+  return listed.slice(-BROWSE_LIMIT).reverse();
 }
 
 // What: drop a room from the map.
@@ -79,4 +108,8 @@ export function findReclaim(room, { playerId, playerName }) {
 // What: how many rooms are alive. Useful while debugging a leak. Not used by the game.
 export function roomCount() {
   return rooms.size;
+}
+
+export function clearRooms() {
+  rooms.clear();
 }

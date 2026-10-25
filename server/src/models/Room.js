@@ -82,6 +82,20 @@ export class Room {
   // What: push the latest roster to every socket in the room.
   broadcastRoster() {
     this.emit('room_update', this.rosterPayload());
+    this.onChange?.();
+  }
+
+  // What: the fields a stranger on the home screen is allowed to see.
+  // Why: Browse should not print the room code. Join still sends the id on the socket.
+  toBrowse() {
+    const host = this.players.get(this.hostId);
+    return {
+      roomId: this.id,
+      host: host?.name || 'Host',
+      playerCount: this.players.size,
+      maxPlayers: this.settings.maxPlayers,
+      rounds: this.settings.rounds,
+    };
   }
 
   // What: players whose socket is up right now.

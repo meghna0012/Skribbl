@@ -7,7 +7,7 @@ import RoomBar from '../components/RoomBar.jsx';
 import RoundOverlay from '../components/RoundOverlay.jsx';
 import Toolbar from '../components/Toolbar.jsx';
 import WordChoice from '../components/WordChoice.jsx';
-import { COLORS, SIZES } from '../constants.js';
+import { COLORS, ERASER_COLOR, SIZES } from '../constants.js';
 import { formatTime } from '../format.js';
 
 // What: one layout for choosing, drawing, the round reveal, and the final scores.
@@ -19,6 +19,7 @@ export default function Game({ room }) {
   const canvasRef = useRef(null);
   const [color, setColor] = useState(COLORS[0]);
   const [size, setSize] = useState(SIZES[1].width);
+  const [tool, setTool] = useState('pen');
   const guessed = room.game?.guessedIds?.includes(room.playerId);
   const canDraw = room.isDrawer && room.phase === 'drawing' && !room.game?.paused;
   const drawer = room.players.find((player) => player.id === room.game?.drawerId);
@@ -66,7 +67,7 @@ export default function Game({ room }) {
             <Canvas
               ref={canvasRef}
               interactive={canDraw}
-              color={color}
+              color={tool === 'eraser' ? ERASER_COLOR : color}
               size={size}
               onDraw={room.emitDraw}
             />
@@ -89,7 +90,12 @@ export default function Game({ room }) {
             <Toolbar
               color={color}
               size={size}
-              onColor={setColor}
+              tool={tool}
+              onTool={setTool}
+              onColor={(next) => {
+                setColor(next);
+                setTool('pen');
+              }}
               onSize={setSize}
               onUndo={() => canvasRef.current?.undo()}
               onClear={() => canvasRef.current?.clear()}

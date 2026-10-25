@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
   drawTime: 80,
   wordCount: 3,
   hints: 2,
+  listed: true,
 };
 
 export const COLORS = [
@@ -23,6 +24,11 @@ export const COLORS = [
   '#92400e',
   '#64748b',
 ];
+
+// The eraser paints in the canvas background. The board is always opaque white, so
+// a white stroke looks erased, undoes like any stroke, and replays for late joiners
+// with no new event or server rule. Must be in COLORS so the server keeps it.
+export const ERASER_COLOR = '#ffffff';
 
 export const SIZES = [
   { id: 's', label: 'S', width: 0.006 },

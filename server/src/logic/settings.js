@@ -20,6 +20,9 @@ export function clampSettings(input = {}) {
       ? Math.min(max, Math.max(min, Math.round(value)))
       : fallback;
   }
+  // Rooms are not public on create. Listed rooms still show in Browse.
+  // Unchecked `listed` keeps the room code-only.
+  settings.listed = input.listed !== false;
   return settings;
 }
 

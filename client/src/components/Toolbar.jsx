@@ -2,7 +2,9 @@ import { COLORS, SIZES } from '../constants.js';
 
 // Drawer-only tools. The parent decides whether to render this at all.
 // Colors and sizes are the same constants the server will accept.
-export default function Toolbar({ color, size, onColor, onSize, onUndo, onClear }) {
+export default function Toolbar({
+  color, size, tool, onTool, onColor, onSize, onUndo, onClear,
+}) {
   return (
     <div className="toolbar">
       <div className="swatches">
@@ -10,10 +12,10 @@ export default function Toolbar({ color, size, onColor, onSize, onUndo, onClear 
           <button
             key={swatch}
             type="button"
-            className={swatch === color ? 'swatch on' : 'swatch'}
+            className={tool === 'pen' && swatch === color ? 'swatch on' : 'swatch'}
             style={{ background: swatch }}
             aria-label={swatch}
-            aria-pressed={swatch === color}
+            aria-pressed={tool === 'pen' && swatch === color}
             onClick={() => onColor(swatch)}
           />
         ))}
@@ -31,6 +33,14 @@ export default function Toolbar({ color, size, onColor, onSize, onUndo, onClear 
           </button>
         ))}
       </div>
+      <button
+        type="button"
+        className={tool === 'eraser' ? 'size on' : 'size'}
+        aria-pressed={tool === 'eraser'}
+        onClick={() => onTool(tool === 'eraser' ? 'pen' : 'eraser')}
+      >
+        Eraser
+      </button>
       <button type="button" className="ghost" onClick={onUndo}>Undo</button>
       <button type="button" className="ghost danger" onClick={onClear}>Clear</button>
     </div>

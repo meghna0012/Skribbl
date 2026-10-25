@@ -2,7 +2,7 @@
 
 Skribbl is a private-room drawing and guessing game. One player draws a word. Everyone else tries to name it. The highest score after the last round wins.
 
-This file is the walkthrough of the decisions in the code: what we built, what else was on the table, and why this version won. The scope is the must-have and should-have features of a skribbl-style game: rooms, a lobby, drawing that stays in sync, word choice, guessing, scoring, brush tools, hints, chat, a draw-time clock, and invite links. Accounts, a public room list, an eraser, categories, kick, custom words, avatars, spectators, and replays were left out on purpose so the game stays something one person can explain end to end.
+This file is the walkthrough of the decisions in the code: what we built, what else was on the table, and why this version won. The scope is the must-have and should-have features of a skribbl-style game: rooms, a lobby, drawing that stays in sync, word choice, guessing, scoring, brush tools, hints, chat, a draw-time clock, and invite links. A Browse rooms tab (a capped list of open rooms) and an eraser were added after the first cut. Accounts, categories, kick, custom words, avatars, spectators, and replays were left out on purpose so the game stays something one person can explain end to end.
 
 The code is written the way a developer with a couple of years of experience would write it: the server is the authority, the pieces have names you can point at, and there is no framework for a problem that is one process and a handful of classes.
 
@@ -50,13 +50,18 @@ The `room:` prefix exists because Socket.IO room names and socket ids share one 
 
 **Why this one.** A room is a live object: a timer, an open socket list, and a stroke array that changes many times a second. Putting that in Redis means serializing it on every point. Putting it in Postgres means the same, plus a schema for something that is gone when the players leave. A file would corrupt if the process died mid-write. The in-memory map matches the lifetime of the game. The cost is honest and written down: this build cannot scale sideways, and a deploy kicks everyone out. `onEmpty` deletes the room when the last seat is removed, so the map does not grow with abandoned codes.
 
-## Private rooms only
+## Invite codes, plus a capped Browse list
 
-**What we did.** Create a room, get a 6-character code, share `/?room=CODE`. There is no list of public games and no matchmaking.
+**What we did.** Every room is created invite-only: a 6-character code and a `/?room=CODE` link. On top of that, a room is *listed* by default, and the host can untick "List in Browse rooms" to keep it code-only (`settings.listed`). The Browse rooms tab on the home screen shows at most 10 rooms, newest first, skipping unlisted and full ones. Each row carries only the host name, `players/max`, and rounds, plus the code the Join button needs. The server owns the list (`listBrowsableRooms` in `store.js`) and pushes `room_list` to every socket whenever a room is created, joined, left, or emptied. There is no matchmaking and no "quick join."
 
-**Other options.** A public lobby browser. A "quick join" that drops you into the first open room. Both, with a private flag.
+**Other options.**
 
-**Why this one.** A public list needs moderation, a way to hide in-progress games, and a story for rooms that are full. Invite links already solve "play with people I know," which is the game we scoped. The code alphabet is `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`. Zero, O, one, and I are missing so a code read out loud is less ambiguous. Six characters from 32 symbols is large enough that `uniqueCode` almost never retries, and small enough to read in a chat message.
+- Code-only, with no list at all (the first version).
+- A quick-join button that drops you into the first open room.
+- A two-way public/private toggle with listing off by default.
+- A full, paged lobby browser with search and filters.
+
+**Why this one.** The assignment lists public rooms as optional and wants private invite rooms kept. Treating "listed" as a per-room opt-out gives both without a second room type: the room object, join path, and code are identical. The cost is real and written down: a listed room is discoverable by strangers, and there is no kick or report, so the host's only protection is unticking the box. That is why the default is a one-line change in `clampSettings` if you would rather make listing opt-in. Capping at 10 and dropping full rooms keeps a dead row from using a slot, and a single push event keeps the list fresh without polling. Rooms already in a game stay listed while they have space, because late join is supported. The code alphabet is `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`. Zero, O, one, and I are missing so a code read out loud is less ambiguous. Six characters from 32 symbols is large enough that `uniqueCode` almost never retries, and small enough to read in a chat message.
 
 ## Player, Room, and Game
 
@@ -172,7 +177,7 @@ During choosing, the drawer cannot type a word option into chat. Otherwise they 
 - A bitmap (PNG) broadcast on an interval.
 - Echo every point back to the drawer and let them paint from the server stream.
 - Fabric, Konva, or perfect-freehand.
-- An eraser as a destination-out stroke.
+- An eraser as a destination-out stroke (a true compositing mode). We use a white stroke instead. See below.
 - Free color input and free brush size.
 - Putting each point in React state.
 
@@ -180,7 +185,7 @@ During choosing, the drawer cannot type a word option into chat. Otherwise they 
 
 We did not pull in a canvas library. The feature set is polylines, three widths, undo, and clear. A library would be most of the client bundle for that. React state per point would re-render the chat, the scores, and the toolbar thirty times a second. The canvas keeps strokes in a ref and the rest of the app hears "a command arrived" through one `canvasCmd` object with a fresh id, because the same stroke object sent twice must still count as a new command.
 
-The 32ms throttle drops samples, not the stroke. `pointerup` always sends the last point, so a fast flick still ends where the finger lifted. The 4000 cap is a guard against a stuck pointer flooding the room. Snapping color and size on the server means a modified client cannot send a 200px brush or a color that fails to render. There is no eraser because it was out of scope. Undo plus clear covers "I made a mess" without a second compositing mode.
+The 32ms throttle drops samples, not the stroke. `pointerup` always sends the last point, so a fast flick still ends where the finger lifted. The 4000 cap is a guard against a stuck pointer flooding the room. Snapping color and size on the server means a modified client cannot send a 200px brush or a color that fails to render. The eraser is a normal stroke painted in the board color (`ERASER_COLOR`, white). The canvas is always filled opaque white before strokes are replayed, so a white stroke looks erased. Because it is a stroke it needs no new socket event and no server rule: it is stored in order, relayed, undone, cleared, and replayed to late joiners like any other line. White is already in the palette, so the server's color snapping keeps it, and `eraser.test.js` pins that coupling. The trade-off is that erasing adds a stroke instead of removing pixels, so a heavily erased picture holds more strokes than a true destination-out eraser would. It also depends on the board staying opaque white. If the board ever gets a background color or image, switch to a composite mode and add a flag to the stroke.
 
 `touch-action: none` on the canvas is what stops the page from scrolling while a finger draws.
 
@@ -242,4 +247,4 @@ Chat history is capped at 80 lines on the server and again when the reducer appe
 
 ## What this design refuses to pretend
 
-A second server cannot see the `Map`. There is no login, so "who are you" is a player id in this tab. There is no eraser, no kick, and no replay. The live URL in the README is a placeholder until someone deploys the single Node service. Those are boundaries, not bugs waiting in the code.
+A second server cannot see the `Map`. There is no login, so "who are you" is a player id in this tab. There is no kick, no ban, and no replay, so a listed room is only as safe as its host's choice to unlist it. The live URL in the README is a placeholder until someone deploys the single Node service. Those are boundaries, not bugs waiting in the code.

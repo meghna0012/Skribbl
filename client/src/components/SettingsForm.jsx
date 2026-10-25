@@ -28,6 +28,15 @@ export default function SettingsForm({ settings, onChange, disabled }) {
           />
         </label>
       ))}
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={settings.listed !== false}
+          disabled={disabled}
+          onChange={(event) => update('listed', event.target.checked)}
+        />
+        <span>List in Browse rooms</span>
+      </label>
     </div>
   );
 }

@@ -1,0 +1,22 @@
+# Render Blueprint: one Node web service serves the React build, the REST health check
+# and the Socket.IO endpoint from the same origin.
+services:
+  - type: web
+    name: skribbl
+    runtime: node
+    plan: free
+    # Keep a single instance. Rooms live in this process's memory, so a second
+    # instance would not see them and players would land in different worlds.
+    numInstances: 1
+    region: oregon
+    # --include=dev is required: Vite and the React plugin are devDependencies,
+    # and Render builds with NODE_ENV=production, which skips them by default.
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      # Render injects PORT itself (default 10000). server/src/index.js reads it.
+      # CLIENT_ORIGIN is not needed: the API and the UI share one origin.

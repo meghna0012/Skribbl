@@ -4,6 +4,8 @@ import {
   createRoom,
   findReclaim,
   getRoom,
+  listBrowsableRooms,
+  setRoomsChangedListener,
   uniqueName,
 } from './store.js';
 
@@ -103,7 +105,17 @@ function detach(socket) {
 // What: wire socket events to Room and Game. This file checks who may emit.
 // It does not score, match words, or store strokes. Those methods live on the models.
 export function attachSocket(io) {
+  setRoomsChangedListener(() => {
+    io.emit('room_list', { rooms: listBrowsableRooms() });
+  });
+
   io.on('connection', (socket) => {
+    socket.on('list_rooms', (_payload, callback) => {
+      const rooms = listBrowsableRooms();
+      socket.emit('room_list', { rooms });
+      reply(socket, callback, { ok: true, rooms });
+    });
+
     // Leave any room this socket already joined so one connection cannot sit in two rooms.
     socket.on('create_room', (payload = {}, callback) => {
       detach(socket);
@@ -192,6 +204,7 @@ export function attachSocket(io) {
         hostId: room.hostId,
       });
       console.log(`${player.name} joined ${room.id}`);
+      room.onChange?.();
       reply(socket, callback, { ok: true, roomId: room.id, playerId: player.id });
     });
 

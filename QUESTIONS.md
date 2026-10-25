@@ -204,13 +204,19 @@ The interval and the socket handler share one process and one call stack. Node r
 
 They get the public game state: phase, mask, time left, scores, who is drawing. They get `canvas_state` so the picture is current. They do not get the word. They do not get the drawer's options. They can guess if the phase is still `drawing` and they are not the drawer. They were not in the turn order that was shuffled at the start. The current match's order stays as it was. They are part of "connected non-drawers" for the everyone-guessed check, so their presence can keep the round going until they guess or the clock ends. That is a bit generous to the people who were already there (a new guesser can still score) and a bit strict (the round does not end early just because the original group had all guessed, if the new person has not). It matches the definition we can explain: everyone here who can guess, has guessed.
 
-## 35. How would you add accounts, or an eraser, without throwing this out?
+## 35. How would you add accounts, or improve the eraser, without throwing this out?
 
 Accounts would sit in front of seat creation: a user id on `Player`, minted by a login step, used as the reclaim key instead of a random player id. The `Map` would still not be the place to store passwords. The game loop would not change. The design pressure would be host transfer and "this user already has a seat," which `session_taken` already sketches.
 
-An eraser is a stroke with a composite mode, or a color that means "destination out." It has to be stored in the stroke list so undo, refresh, and late join all replay it. A bitmap eraser painted only on the drawer's canvas would desync everyone else. That is why it was left out rather than half-added: the stroke model can represent it, and the UI scope said no.
+The eraser already exists, and it is a stroke painted in the board color (white). It is stored in the stroke list, so undo, refresh, and late join all replay it, and it needs no new socket event. A bitmap eraser painted only on the drawer's canvas would have desynced everyone else, which is why it is not done that way. The limit is that it only works because the board is opaque white and it adds strokes instead of removing pixels. If the board ever gets a background, the upgrade is a composite flag on the stroke (`destination-out`) that the server stores and `drawStroke` honors.
 
 Both features are additions at a named boundary (`Player`, the stroke object), which is the reason those boundaries exist.
+
+## 35b. How does Browse rooms work, and what stops it leaking private rooms?
+
+Every room has `settings.listed`, true unless the host unticks "List in Browse rooms." `listBrowsableRooms` in `store.js` walks the room map, skips unlisted and full rooms, takes the newest 10, and maps each through `Room.toBrowse()`, which exposes only the host name, player count, max players, rounds, and the code. The server pushes `room_list` to every socket whenever a room is created, joined, left, or emptied, and a client can ask with `list_rooms`.
+
+What it does not stop: a listed room is discoverable by anyone, and there is no kick, ban, or report. The only privacy control is the host unticking the box before creating. That default is one line in `clampSettings`.
 
 ## 36. Why are the tests only the pure functions?
 

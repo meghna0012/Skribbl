@@ -3,7 +3,7 @@ import SettingsForm from '../components/SettingsForm.jsx';
 import { DEFAULT_SETTINGS } from '../constants.js';
 import { loadSession } from '../hooks/useRoom.js';
 
-// What: name, then either create a room or join one by code.
+// What: name, then create a room, join by code, or pick a listed room from Browse.
 // Why: an invite URL prefills the code and opens the join tab. Settings stay local
 // until create, because there is no room yet for the server to store them in.
 export default function Home({ room }) {
@@ -32,7 +32,7 @@ export default function Home({ room }) {
         <p className="eyebrow">Draw and guess</p>
         <h1>Skribbl</h1>
         <p className="lede">
-          One person draws. Everyone else races to name it. Rooms stay private and travel by a short code.
+          One person draws. Everyone else races to name it. Create a room, join with a code, or pick an open room from Browse.
         </p>
       </section>
       <section className="card">
@@ -52,6 +52,16 @@ export default function Home({ room }) {
           <button type="button" className={mode === 'join' ? 'on' : ''} onClick={() => setMode('join')}>
             Join
           </button>
+          <button
+            type="button"
+            className={mode === 'browse' ? 'on' : ''}
+            onClick={() => {
+              setMode('browse');
+              room.refreshBrowse();
+            }}
+          >
+            Browse rooms
+          </button>
         </div>
         {mode === 'create' ? (
           <form onSubmit={create}>
@@ -60,7 +70,7 @@ export default function Home({ room }) {
               {room.busy ? 'Creating…' : 'Create room'}
             </button>
           </form>
-        ) : (
+        ) : mode === 'join' ? (
           <form onSubmit={join}>
             <label>
               <span>Room code</span>
@@ -76,6 +86,39 @@ export default function Home({ room }) {
               {room.busy ? 'Joining…' : 'Join room'}
             </button>
           </form>
+        ) : (
+          <div className="browse">
+            {!name.trim() ? (
+              <p className="muted">Enter a name above, then join a room.</p>
+            ) : null}
+            {(room.browseRooms || []).length === 0 ? (
+              <p className="muted">No open rooms right now. Create one, or join with a code.</p>
+            ) : (
+              <ul className="browse-list">
+                <li className="browse-head">
+                  <span>Host</span>
+                  <span>Players</span>
+                  <span>Rounds</span>
+                  <span />
+                </li>
+                {room.browseRooms.map((row) => (
+                  <li key={row.roomId}>
+                    <span>{row.host}</span>
+                    <span>{row.playerCount}/{row.maxPlayers}</span>
+                    <span>{row.rounds}</span>
+                    <button
+                      type="button"
+                      className="primary"
+                      disabled={room.busy || !name.trim()}
+                      onClick={() => room.joinRoom(name.trim(), row.roomId)}
+                    >
+                      {room.busy ? 'Joining…' : 'Join'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </section>
     </main>

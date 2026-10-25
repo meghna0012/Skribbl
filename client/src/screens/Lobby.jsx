@@ -36,7 +36,7 @@ export default function Lobby({ room }) {
           phase="lobby"
         />
         <section className="panel lobby-main">
-          <p className="eyebrow">Private room</p>
+          <p className="eyebrow">{room.settings?.listed === false ? 'Private room' : 'Open room'}</p>
           <h2>Share the code</h2>
           <button type="button" className="code" onClick={copyInvite}>{room.roomId}</button>
           <p className="muted">

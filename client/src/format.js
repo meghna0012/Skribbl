@@ -23,7 +23,8 @@ export function settingsLine(settings) {
   const hints = settings.hints === 0
     ? 'no hints'
     : `${settings.hints} hint${settings.hints === 1 ? '' : 's'}`;
-  return `${settings.rounds} rounds · ${settings.drawTime}s · ${settings.wordCount} word choices · ${hints} · up to ${settings.maxPlayers} players`;
+  const listed = settings.listed === false ? 'code only' : 'listed in Browse';
+  return `${settings.rounds} rounds · ${settings.drawTime}s · ${settings.wordCount} word choices · ${hints} · up to ${settings.maxPlayers} players · ${listed}`;
 }
 
 // One winner gets a name. If the whole table shares the top score, say it is a tie

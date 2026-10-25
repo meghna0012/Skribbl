@@ -55,6 +55,7 @@ const initialState = {
   roundEnd: null,
   gameOver: null,
   canvasCmd: null,
+  browseRooms: [],
 };
 
 // What: one reducer for the whole room.
@@ -202,6 +203,8 @@ function reducer(state, action) {
       };
     case 'canvas':
       return { ...state, canvasCmd: action.cmd };
+    case 'browse':
+      return { ...state, browseRooms: action.rooms || [] };
     default:
       return state;
   }
@@ -220,6 +223,7 @@ export function useRoom() {
     // Rejoin only when this tab already has a seat and the URL is not a different room.
     // A shared invite link should show the join form, not pull us back into the old game.
     function onConnect() {
+      socket.emit('list_rooms');
       const session = loadSession();
       const queryRoom = new URLSearchParams(window.location.search).get('room');
       if (!session || (queryRoom && queryRoom.toUpperCase() !== session.roomId)) {
@@ -267,6 +271,9 @@ export function useRoom() {
     socket.on('draw_data', (data) => {
       dispatch({ type: 'canvas', cmd: { ...data, id: crypto.randomUUID() } });
     });
+    socket.on('room_list', (payload) => {
+      dispatch({ type: 'browse', rooms: payload?.rooms || [] });
+    });
     socket.on('session_taken', ({ message }) => {
       clearSession();
       dispatch({ type: 'reset', message });
@@ -301,6 +308,7 @@ export function useRoom() {
         'guess_result',
         'canvas_state',
         'draw_data',
+        'room_list',
         'session_taken',
         'error',
         'connect_error',
@@ -400,6 +408,7 @@ export function useRoom() {
     clearError: () => dispatch({ type: 'clear_error' }),
     createRoom,
     joinRoom,
+    refreshBrowse: () => emit('list_rooms', {}),
     leaveRoom,
     setReady: (ready) => emit('player_ready', { ready }),
     updateSettings: (settings) => emit('update_settings', settings),
