@@ -5,7 +5,7 @@
 > A spin-down (or any redeploy) also **wipes every room**, because rooms live in server memory. If a game is in progress when that happens, everyone is dropped back to the home screen.
 > Open the link a minute before you want to play, and refresh once if the first load hangs.
 
-**Live URL:** _add the `https://<your-service>.onrender.com` URL here after the first deploy._
+**Live URL:** https://skribbl-w1i9.onrender.com/
 
 A multiplayer drawing and guessing game. One player draws a word, everyone else tries to name it, and the highest score after the last round wins. The browser is only a client. The Node server owns the rooms, the word, the clock and the scores.
 
@@ -257,7 +257,7 @@ The repo ships a Blueprint, [`render.yaml`](render.yaml).
 
 1. Push the repo to GitHub.
 2. In Render choose **New → Blueprint** and select the repo. Render reads `render.yaml` and creates one web service.
-3. Wait for the build, open the `onrender.com` URL, and paste it at the top of this README.
+3. Wait for the build, then open the service URL. This project's is https://skribbl-w1i9.onrender.com/, which is also linked at the top of this README.
 
 What the Blueprint sets:
 

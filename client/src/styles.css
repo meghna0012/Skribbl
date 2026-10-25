@@ -115,6 +115,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .ghost {
   background: #fff;
   box-shadow: 0 5px 0 #d9cbe6, 0 10px 14px #5b4a6b1a, var(--clay-inner-sm);
+  margin-top: 1rem;
 }
 .ghost:active:not(:disabled) { box-shadow: 0 1px 0 #d9cbe6, var(--clay-inner-sm); }
 
@@ -509,6 +510,15 @@ input.invalid, input.invalid:focus {
   box-shadow: 0 5px 0 #e8c963, 0 10px 14px #e8c96355, var(--clay-inner-sm);
 }
 .code:active:not(:disabled) { box-shadow: 0 1px 0 #e8c963, var(--clay-inner-sm); }
+/* The code is a display, not a button. One click selects all of it, for copying by hand. */
+div.code { user-select: all; cursor: text; }
+
+.copy-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.copy-row button { padding: 6px 18px; font-size: 16px; }
 
 .summary { line-height: 1.5; }
 

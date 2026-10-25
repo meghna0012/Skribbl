@@ -124,7 +124,7 @@ Room names are `room:${code}` because a Socket.IO room and a socket id live in t
 
 The browser needs a process that stays up and holds the rooms. Vercel, Netlify, and any host that runs a function per request will accept the HTTP page and then drop the socket, or cold-start a new process that has an empty `Map`. The production shape is one Node service: `npm run build` then `npm start`. Express serves `client/dist`, the health route, and Socket.IO on the same port. The SPA fallback sends `index.html` for frontend routes and refuses to do that for `/api` and `/socket.io`, so the handshake is not replaced with HTML.
 
-There is no live URL in the repo yet. The README says to fill it in after the service is public.
+The live URL is https://skribbl-w1i9.onrender.com/ and it is at the top of the README. It runs on Render's free plan, so the first visit after about 15 minutes idle takes roughly 30 to 60 seconds, and a spin-down clears every room.
 
 ## 20. What breaks if we run two servers?
 

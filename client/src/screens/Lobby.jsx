@@ -6,10 +6,11 @@ import SettingsForm from '../components/SettingsForm.jsx';
 import { settingsLine } from '../format.js';
 
 // What: the waiting room. Host edits settings and starts. Everyone else sees the summary.
-// Why: the code button copies the invite link. Ready is visible but does not gate start.
+// Why: the code and the invite link have their own copy buttons. Start waits for Ready.
 // That rule lives on the server. This screen only disables Start when fewer than two people are connected.
 export default function Lobby({ room }) {
-  const [copied, setCopied] = useState(false);
+  // Which copy button was just used: 'code', 'link', 'failed', or '' for none.
+  const [copied, setCopied] = useState('');
   const me = room.players.find((player) => player.id === room.playerId);
   // Same rule as the server: the host counts as ready, every other connected player must be.
   const waitingFor = room.players.filter(
@@ -17,16 +18,30 @@ export default function Lobby({ room }) {
   );
   const canStart = room.connectedCount >= 2 && waitingFor.length === 0;
 
-  async function copyInvite() {
-    const link = `${window.location.origin}/?room=${room.roomId}`;
+  // What: copy either the bare room code or the full invite link.
+  // Why: the code is for reading out loud or typing into Join. The link opens straight
+  // into the Join tab with the code filled in. They are different things to paste.
+  // The clipboard API can be refused (no permission, or a non-secure page), so a failure
+  // says so instead of leaving the user thinking it worked.
+  async function copy(kind) {
+    const text = kind === 'code'
+      ? room.roomId
+      : `${window.location.origin}/?room=${room.roomId}`;
+    let result = kind;
     try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+      await navigator.clipboard.writeText(text);
     } catch {
-      setCopied(false);
+      result = 'failed';
     }
+    setCopied(result);
+    window.setTimeout(() => setCopied(''), 1800);
   }
+
+  const copyMessage = {
+    code: 'Room code copied.',
+    link: 'Invite link copied.',
+    failed: 'Could not copy. Select the code and copy it by hand.',
+  }[copied];
 
   return (
     <div className="shell">
@@ -42,11 +57,16 @@ export default function Lobby({ room }) {
         />
         <section className="panel lobby-main">
           <p className="eyebrow">{room.settings?.listed === false ? 'Private room' : 'Open room'}</p>
-          <h2>Share the code</h2>
-          <button type="button" className="code" onClick={copyInvite}>{room.roomId}</button>
-          <p className="muted">
-            {copied ? 'Invite link copied.' : 'Click the code to copy an invite link.'}
-          </p>
+          <div className="code" aria-label={`Room code ${room.roomId}`}>{room.roomId}</div>
+          <div className="copy-row">
+            <button type="button" className="ghost" onClick={() => copy('code')}>
+              {copied === 'code' ? 'Copied ✓' : 'Copy code'}
+            </button>
+            <button type="button" className="ghost" onClick={() => copy('link')}>
+              {copied === 'link' ? 'Copied ✓' : 'Copy link'}
+            </button>
+          </div>
+          <p className="muted" role="status">{copyMessage}</p>
           {room.isHost ? (
             <SettingsForm settings={room.settings} onChange={room.updateSettings} />
           ) : (
@@ -55,12 +75,14 @@ export default function Lobby({ room }) {
           <div className="lobby-actions">
             {/* The host starts the game, which is their "ready", so they get no Ready button. */}
             {!room.isHost && (
+              /* The label is the action the click performs, not the current state.
+                 The state is already shown as "ready" next to your name in the player list. */
               <button
                 type="button"
-                className={me?.ready ? 'primary' : 'ghost'}
+                className={me?.ready ? 'ghost' : 'primary'}
                 onClick={() => room.setReady(!me?.ready)}
               >
-                {me?.ready ? 'Ready' : 'Not ready'}
+                {me?.ready ? 'Not ready' : 'Ready'}
               </button>
             )}
             {room.isHost ? (

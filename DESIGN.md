@@ -217,7 +217,7 @@ The 32ms throttle drops samples, not the stroke. `pointerup` always sends the la
 
 **Why this one.** The client state is "the last thing the server said," plus a busy flag and a toast. A reducer gives each server event a name (`joined`, `roster`, `round_start`, `timer`) without a store library. Router URLs are nice for many pages. Here the server already decides the page, and a refresh is handled by the session plus `?room=`. Tailwind would be fine and would add a build convention for a layout of three columns. One stylesheet is enough to see that the stage is `240px`, a flexible board, and `300px`, and that under 980px those columns stack. Side panels get a max height in that breakpoint so the canvas is still on screen.
 
-The lobby code button uses `align-self: flex-start`. The lobby is a flex column. `justify-self` does nothing there, and the button stretched across the panel until that was fixed.
+The lobby shows the room code as a plain display with `align-self: flex-start`, and two separate buttons, Copy code and Copy link. The code is for reading out or typing into Join. The link opens the Join tab with the code filled in. They used to be one button that always copied the link, which hid the fact that there were two different things to share. The lobby is a flex column, and `justify-self` does nothing there, so the code stretched across the panel until `align-self` was used. A failed clipboard write now says so instead of looking like a success.
 
 Chat history is capped at 80 lines on the server and again when the reducer appends, so a long game does not grow the DOM without bound.
 
@@ -247,4 +247,4 @@ Chat history is capped at 80 lines on the server and again when the reducer appe
 
 ## What this design refuses to pretend
 
-A second server cannot see the `Map`. There is no login, so "who are you" is a player id in this tab. There is no kick, no ban, and no replay, so a listed room is only as safe as its host's choice to unlist it. The live URL in the README is a placeholder until someone deploys the single Node service. Those are boundaries, not bugs waiting in the code.
+A second server cannot see the `Map`. There is no login, so "who are you" is a player id in this tab. There is no kick, no ban, and no replay, so a listed room is only as safe as its host's choice to unlist it. The live service is a single free-tier Node process on Render (URL in the README), so it sleeps when idle and loses its rooms when it does. Those are boundaries, not bugs waiting in the code.
