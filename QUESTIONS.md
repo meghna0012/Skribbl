@@ -1,6 +1,6 @@
 # Questions this project raises
 
-These are the questions a walkthrough, a review, or an interview tends to pull out of Scribble, with the answer that matches the code. Read [DESIGN.md](DESIGN.md) for the option-by-option decisions. This file is the longer explanation of each question.
+These are the questions a walkthrough, a review, or an interview tends to pull out of Skribbl, with the answer that matches the code. Read [DESIGN.md](DESIGN.md) for the option-by-option decisions. This file is the longer explanation of each question.
 
 ## 1. Walk me through one stroke, from the drawer's mouse to another player's screen.
 
@@ -36,7 +36,7 @@ Choosing a word is the same clock, with a separate counter of 15 seconds. If the
 
 `disconnect` does not delete the seat. It marks the player disconnected and starts a 20 second timer. If they were the drawer, `Game` sets `paused` and the interval stops decrementing. The seat still holds the player id, the score, and the role.
 
-The tab has `sessionStorage` under `scribble-session` with the room id, the player id, and the name. On connect, if that room matches the room in the URL (or the URL has no room), the client emits `join_room` with the player id. The server reattaches that seat, clears the disconnect timer, and if they were drawing, unpauses. The client also gets `canvas_state`, so the picture comes back.
+The tab has `sessionStorage` under `skribbl-session` with the room id, the player id, and the name. On connect, if that room matches the room in the URL (or the URL has no room), the client emits `join_room` with the player id. The server reattaches that seat, clears the disconnect timer, and if they were drawing, unpauses. The client also gets `canvas_state`, so the picture comes back.
 
 If they do not return within 20 seconds, the seat is removed. If they were drawing, the round ends with reason `drawer_left` and the drawer is not paid for that round. If the room drops below two connected players, the match is abandoned to the lobby with no winner.
 

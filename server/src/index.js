@@ -47,5 +47,5 @@ app.use((req, res, next) => {
 });
 
 httpServer.listen(port, () => {
-  console.log(`Scribble server listening on ${port}`);
+  console.log(`Skribbl server listening on ${port}`);
 });

@@ -5,7 +5,7 @@ export default function RoomBar({ roomId, onLeave, children }) {
     <header className="topbar">
       <div className="brand">
         <span className="mark" aria-hidden="true" />
-        Scribble
+        Skribbl
       </div>
       <p className="room-code">Room <strong>{roomId}</strong></p>
       <div className="top-meta">{children}</div>

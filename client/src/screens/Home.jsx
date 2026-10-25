@@ -30,7 +30,7 @@ export default function Home({ room }) {
     <main className="home">
       <section className="hero">
         <p className="eyebrow">Draw and guess</p>
-        <h1>Scribble</h1>
+        <h1>Skribbl</h1>
         <p className="lede">
           One person draws. Everyone else races to name it. Rooms stay private and travel by a short code.
         </p>

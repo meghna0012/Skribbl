@@ -1,22 +1,68 @@
+/* The two rounded fonts. This is the only network request the stylesheet makes.
+   If they fail to load, the fallbacks below take over. */
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@700;800&display=swap");
+
 /* One stylesheet on purpose. The layout is: players left, canvas center, chat right.
    Tokens stay in :root so the lobby and the game do not drift into two palettes.
-   System fonts only, so the page does not wait on a font download. */
+
+   Look: soft puffy clay. Pastel surfaces, no outlines, a soft drop shadow under every
+   raised piece, a light highlight on the top-left and a darker inner shade on the
+   bottom-right, pill buttons that press down, and plum ink instead of black.
+
+   Rules this file keeps so the game logic is untouched:
+   - No class names were renamed, so every JSX file still matches.
+   - Layout rules (grid columns, flex, heights, overflow, positioning) are unchanged.
+   - .canvas-wrap has no padding and no transform. Canvas.jsx measures that box with
+     clientWidth and getBoundingClientRect, so padding or a tilt would shift drawn points.
+   - Colors that JSX sets inline (avatars, swatches) are not overridden. */
 :root {
   color-scheme: light;
-  --paper: #f3ecdf;
-  --paper-deep: #e7dcc8;
-  --ink: #1c1915;
-  --muted: #6d6458;
-  --line: #ddd2c0;
-  --panel: #fffaf3;
-  --teal: #0f766e;
-  --teal-dark: #115e59;
-  --rose: #9f1239;
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  --ink: #5b4a6b;
+  --ink-deep: #3d2e4d;
+  --ink-soft: #75658a;
+  --bg: #fbf7f0;
+  --card: #fffafd;
+  --pink: #ffb3cf;
+  --pink-deep: #ff8fb8;
+  --peach: #ffcfa8;
+  --butter: #ffe9a3;
+  --mint: #b5ecd2;
+  --sky: #aedcfb;
+  --lilac: #d3c0ff;
+  --danger: #c93f68;
+  --good: #1f7a54;
+  /* Older names stay defined in case any component still reads them. */
+  --paper: var(--bg);
+  --paper-deep: #efe3f7;
+  --muted: var(--ink-soft);
+  --line: #e6d9f0;
+  --panel: var(--card);
+  --teal: var(--good);
+  --teal-dark: #17603f;
+  --rose: var(--danger);
+
+  --r-lg: 32px;
+  --r-md: 20px;
+  --r-sm: 14px;
+
+  --display: "Fredoka", "Nunito", system-ui, sans-serif;
+  /* Clay = soft drop shadow + light top-left highlight + darker bottom-right inner shade. */
+  --clay-shadow: 0 10px 24px #5b4a6b22, 0 2px 4px #5b4a6b14;
+  --clay-inner: inset 4px 4px 8px #ffffffcc, inset -5px -6px 10px #5b4a6b1c;
+  --clay-inner-sm: inset 3px 3px 6px #ffffffcc, inset -3px -4px 7px #5b4a6b22;
+
+  font-family: "Nunito", system-ui, sans-serif;
+  font-weight: 700;
   color: var(--ink);
-  background:
-    radial-gradient(circle at top left, #fff8ec 0, transparent 32rem),
-    var(--paper);
+  background-color: var(--bg);
+  /* Paper: warm off-white, a fine grain on top of it, then a sparse tile of pastel doodles.
+     The doodle tile is 800px square with seven small drawings and a lot of empty space, so it
+     reads as margin skribbl, not a pattern. Both layers are inline SVG, so no extra requests. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cg fill='none' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' opacity='.5'%3E%3Cpath d='M110 88 L121 114 L149 117 L128 135 L134 162 L110 148 L86 162 L92 135 L71 117 L99 114 Z' stroke='%23ffb3cf'/%3E%3Cpath d='M360 80 q18 -30 36 0 t36 0 t36 0 t36 0' stroke='%23aedcfb'/%3E%3Cpath d='M650 190 c24 -56 82 -34 58 2 c-24 34 -70 12 -36 -28 c24 -26 70 -10 82 14' stroke='%23bda6f5'/%3E%3Cpath d='M200 440 C150 400 162 362 188 364 C198 365 200 374 200 380 C200 374 202 365 212 364 C238 362 250 400 200 440 Z' stroke='%23ffb98a'/%3E%3Cpath d='M470 470 q80 -70 160 0' stroke='%238fd9b6' stroke-dasharray='1 12'/%3E%3Cpath d='M110 660 L117 683 L140 690 L117 697 L110 720 L103 697 L80 690 L103 683 Z' stroke='%23f2c14e'/%3E%3Cg transform='translate(400 700)'%3E%3Ccircle cx='0' cy='-17' r='9' stroke='%23ffb3cf'/%3E%3Ccircle cx='16' cy='-5' r='9' stroke='%23ffb3cf'/%3E%3Ccircle cx='10' cy='14' r='9' stroke='%23ffb3cf'/%3E%3Ccircle cx='-10' cy='14' r='9' stroke='%23ffb3cf'/%3E%3Ccircle cx='-16' cy='-5' r='9' stroke='%23ffb3cf'/%3E%3Ccircle r='5' stroke='%23f2c14e'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .29 0 0 0 0 .42 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 800px 800px, 220px 220px;
+  background-attachment: fixed;
 }
 
 * { box-sizing: border-box; }
@@ -24,14 +70,57 @@
 body {
   margin: 0;
   min-height: 100vh;
+  font-size: 17px;
 }
 
-button, input { font: inherit; }
+input, select, button { font: inherit; }
 
 button { cursor: pointer; }
 
-h1, h2, p { margin: 0; }
+h1, h2, h3, p { margin: 0; }
+h2, h3 { font-family: var(--display); font-weight: 600; }
 
+/* Keyboard focus. A plum ring with a white gap reads on pink, mint and the paper alike. */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- buttons ----------
+   Base button style at element level, so buttons without a class still match the theme.
+   Classed buttons below override it. Swatch fills come from inline styles and win over this.
+   Label color is deep plum, not white: white on this pink is too faint to read. */
+button {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 18px;
+  padding: 10px 24px;
+  color: var(--ink-deep);
+  background: var(--pink-deep);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 6px 0 #e0689a, 0 12px 18px #e0689a55, var(--clay-inner-sm);
+  transition: transform 0.15s cubic-bezier(0.3, 1.8, 0.5, 1), box-shadow 0.15s, filter 0.15s;
+}
+button:hover:not(:disabled) { transform: translateY(-3px) scale(1.04); filter: brightness(1.05); }
+/* Pressing sinks the button into its shadow. This answers a click, it is not ambient motion. */
+button:active:not(:disabled) {
+  transform: translateY(4px) scale(0.98);
+  box-shadow: 0 2px 0 #e0689a, 0 4px 8px #e0689a44, var(--clay-inner-sm);
+}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.primary { background: var(--pink-deep); }
+
+.ghost {
+  background: #fff;
+  box-shadow: 0 5px 0 #d9cbe6, 0 10px 14px #5b4a6b1a, var(--clay-inner-sm);
+}
+.ghost:active:not(:disabled) { box-shadow: 0 1px 0 #d9cbe6, var(--clay-inner-sm); }
+
+.danger { color: var(--danger); }
+
+/* ---------- home ---------- */
 /* Home is two columns: the pitch, then the form. It collapses under 980px. */
 .home {
   min-height: 100vh;
@@ -42,91 +131,129 @@ h1, h2, p { margin: 0; }
   padding: 48px clamp(20px, 6vw, 96px);
 }
 
+.hero { position: relative; }
+
+/* Puffy 3D lettering: white face, a stack of pink steps for depth, then a soft shadow. */
 .hero h1 {
-  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-family: var(--display);
   font-size: clamp(4rem, 8vw, 7rem);
   font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 0.9;
-  margin: 8px 0 16px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin: 14px 0 18px;
+  color: #fff;
+  text-shadow:
+    0 2px 0 var(--pink-deep), 0 4px 0 #f27aa8, 0 6px 0 #e0689a,
+    0 12px 18px #5b4a6b44;
+}
+
+/* The header illustration: a canvas, a pencil and a guess bubble, drawn as an inline SVG
+   with soft shadows. It is a pseudo-element, so no JSX changes and nothing for a screen
+   reader to announce. Fonts cannot load inside an SVG image, so the bubble text may fall back. */
+.hero::after {
+  content: "";
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 13 / 5;
+  margin-top: 30px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 200'%3E%3Cdefs%3E%3Cfilter id='s' x='-20%25' y='-20%25' width='140%25' height='170%25'%3E%3CfeDropShadow dx='0' dy='7' stdDeviation='6' flood-color='%235b4a6b' flood-opacity='.28'/%3E%3C/filter%3E%3C/defs%3E%3Cg transform='rotate(-4 150 100)' filter='url(%23s)'%3E%3Crect x='24' y='22' width='250' height='150' rx='30' fill='%23fff'/%3E%3Cpath d='M54 128 Q82 68 112 118 T170 108 T238 98' fill='none' stroke='%23ff8fb8' stroke-width='12' stroke-linecap='round'/%3E%3Ccircle cx='224' cy='60' r='20' fill='%23ffe9a3'/%3E%3Cpath d='M62 154 H152' stroke='%23b5ecd2' stroke-width='12' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='rotate(35 394 132)' filter='url(%23s)'%3E%3Cpath d='M327 132 L367 113 V151 Z' fill='%23fff3dc' stroke='%23fff3dc' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M327 132 L341 125.5 V138.5 Z' fill='%235b4a6b'/%3E%3Crect x='367' y='113' width='70' height='38' fill='%23ffcfa8'/%3E%3Crect x='437' y='113' width='26' height='38' rx='13' fill='%23ffb3cf'/%3E%3C/g%3E%3Cg transform='translate(372 8)' filter='url(%23s)'%3E%3Cpath d='M14 0 H94 Q108 0 108 14 V40 Q108 54 94 54 H46 L26 74 L28 54 H14 Q0 54 0 40 V14 Q0 0 14 0 Z' fill='%23d3c0ff'/%3E%3Ctext x='54' y='36' text-anchor='middle' font-family='Fredoka, Nunito, Arial Rounded MT Bold, sans-serif' font-size='24' font-weight='600' fill='%235b4a6b'%3Ecat?%3C/text%3E%3C/g%3E%3Cpath transform='translate(322 40)' d='M0 -13 L3.5 -3.5 L13 0 L3.5 3.5 L0 13 L-3.5 3.5 L-13 0 L-3.5 -3.5Z' fill='%23aedcfb'/%3E%3Cpath transform='translate(498 142)' d='M0 -11 L3 -3 L11 0 L3 3 L0 11 L-3 3 L-11 0 L-3 -3Z' fill='%23ffb3cf'/%3E%3C/svg%3E") left center / contain no-repeat;
 }
 
 .lede {
   max-width: 36rem;
   font-size: 1.15rem;
   line-height: 1.5;
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
+/* A butter pill with a pressed-in finish instead of spaced capitals. */
 .eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.75rem;
-  color: var(--teal);
-  font-weight: 700;
+  display: inline-block;
+  background: var(--butter);
+  color: var(--ink-deep);
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: var(--clay-inner-sm);
 }
 
+/* ---------- surfaces ---------- */
 .card, .panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 16px 40px rgba(70, 48, 20, 0.06);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--clay-shadow), var(--clay-inner);
 }
 
 .card {
-  padding: 22px;
+  padding: 24px 28px;
   display: grid;
   gap: 14px;
+  border-radius: var(--r-lg);
 }
 
+.panel { border-radius: 28px; }
+
+/* ---------- form controls ---------- */
 label {
   display: grid;
   gap: 6px;
-  font-size: 0.85rem;
-  color: var(--muted);
+  font-size: 15px;
+  color: var(--ink-soft);
 }
 
 input[type="text"], input[type="number"], input:not([type]) {
   width: 100%;
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 10px;
-  padding: 10px 12px;
+  padding: 11px 16px;
   color: var(--ink);
+  background: #f3eafa;
+  border: 0;
+  border-radius: var(--r-md);
+  /* Pressed-in clay. */
+  box-shadow: inset 3px 4px 8px #5b4a6b22, inset -3px -3px 6px #ffffffcc;
+  transition: box-shadow 0.15s, background 0.15s;
 }
 
+select {
+  padding: 11px 16px;
+  color: var(--ink);
+  background: #f3eafa;
+  border: 0;
+  border-radius: var(--r-md);
+  box-shadow: inset 3px 4px 8px #5b4a6b22, inset -3px -3px 6px #ffffffcc;
+}
+
+input:focus, select:focus {
+  background: #fff;
+  box-shadow: inset 2px 3px 6px #5b4a6b18, 0 0 0 4px #ffb3cf88;
+}
+input::placeholder { color: #a898b6; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--pink-deep); }
+
+/* The two-tab switch on the home form. Selected looks pressed into the page. */
 .tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 4px;
-  background: var(--paper);
-  border-radius: 12px;
+  gap: 12px;
 }
 
-.tabs button, .ghost, .primary, .size {
-  border: 0;
-  border-radius: 10px;
-  padding: 10px 14px;
+.tabs button {
+  background: var(--sky);
+  font-size: 16px;
+  padding: 8px 20px;
+  box-shadow: 0 5px 0 #86bfe6, 0 10px 14px #86bfe655, var(--clay-inner-sm);
 }
-
-.tabs button { background: transparent; color: var(--muted); }
-.tabs button.on { background: white; color: var(--ink); }
-
-.primary {
-  background: var(--teal);
-  color: white;
+.tabs button:active:not(:disabled) { box-shadow: 0 1px 0 #86bfe6, var(--clay-inner-sm); }
+.tabs button.on,
+.tabs button.on:hover:not(:disabled) {
+  background: var(--butter);
+  transform: translateY(3px);
+  filter: none;
+  box-shadow: 0 2px 0 #e8c963, 0 4px 8px #e8c96355, var(--clay-inner-sm);
 }
-.primary:hover { background: var(--teal-dark); }
-.primary:disabled { opacity: 0.45; cursor: not-allowed; }
-
-.ghost {
-  background: transparent;
-  border: 1px solid var(--line) !important;
-  color: var(--ink);
-}
-
-.danger { color: var(--rose); }
 
 .settings {
   display: grid;
@@ -134,6 +261,7 @@ input[type="text"], input[type="number"], input:not([type]) {
   gap: 10px;
 }
 
+/* ---------- shell: lobby and game ---------- */
 /* The lobby and the game fill the viewport. The header stays put. The stage scrolls inside. */
 .shell {
   height: 100vh;
@@ -145,28 +273,32 @@ input[type="text"], input[type="number"], input:not([type]) {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255, 250, 243, 0.9);
+  padding: 12px 20px;
+  background: var(--mint);
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 8px 18px #5b4a6b1f, var(--clay-inner-sm);
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: "Iowan Old Style", Palatino, Georgia, serif;
-  font-size: 1.4rem;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
+/* Three clay dots, offset like a palette. Right margin leaves room for the shadows. */
 .mark {
   width: 14px;
   height: 14px;
+  margin-right: 22px;
   border-radius: 50%;
-  background: var(--teal);
-  box-shadow: 6px -4px 0 #eab308;
+  background: var(--pink-deep);
+  box-shadow: 11px -5px 0 var(--butter), 22px 3px 0 var(--sky);
 }
 
-.room-code { color: var(--muted); }
+.room-code { color: var(--ink-soft); }
 .room-code strong {
   color: var(--ink);
   letter-spacing: 0.08em;
@@ -177,14 +309,18 @@ input[type="text"], input[type="number"], input:not([type]) {
   display: flex;
   gap: 14px;
   align-items: center;
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
 .clock {
+  font-family: var(--display);
   font-variant-numeric: tabular-nums;
   font-size: 1.3rem;
   color: var(--ink);
-  font-weight: 700;
+  background: #fff;
+  border-radius: 999px;
+  padding: 2px 16px;
+  box-shadow: var(--clay-inner-sm);
 }
 
 /* 240px roster, flexible board, 300px chat. minmax(0, 1fr) lets the canvas shrink
@@ -215,26 +351,38 @@ input[type="text"], input[type="number"], input:not([type]) {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
+/* Rows rotate lilac, mint, peach, sky so neighbors are easy to tell apart. */
 .players li {
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 8px;
   align-items: center;
+  padding: 7px 12px;
+  background: var(--lilac);
+  border-radius: var(--r-md);
+  box-shadow: 0 4px 10px #5b4a6b1a, var(--clay-inner-sm);
 }
+.players li:nth-child(4n+2) { background: var(--mint); }
+.players li:nth-child(4n+3) { background: var(--peach); }
+.players li:nth-child(4n+4) { background: var(--sky); }
 
 .players li.away { opacity: 0.55; }
 
+/* Background color is set inline per player, so only the rim and the shadow are added here. */
 .avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 6px #5b4a6b33;
   color: white;
   display: grid;
   place-items: center;
-  font-weight: 700;
+  font-family: var(--display);
+  text-shadow: 0 1px 2px #5b4a6b88;
 }
 
 .who { display: grid; min-width: 0; }
@@ -243,27 +391,44 @@ input[type="text"], input[type="number"], input:not([type]) {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.who small { color: var(--muted); }
+.who small { color: var(--ink-soft); }
 
-.score { font-variant-numeric: tabular-nums; }
+.score { font-variant-numeric: tabular-nums; font-family: var(--display); }
 
 .lobby-main h2 {
-  font-family: "Iowan Old Style", Palatino, Georgia, serif;
-  font-size: 2rem;
+  font-size: 1.7rem;
 }
+
+.lobby-main .code { font-size: 1.6rem; padding: 2px 18px; }
+
+/* Lobby only. :has() finds the stage that holds the lobby panel, so the game stage keeps its
+   three columns. The panels become a compact group centered on the screen instead of
+   stretching edge to edge. max-height keeps a long player list scrolling inside its panel. */
+.stage:has(.lobby-main) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+.stage:has(.lobby-main) > * { max-height: 100%; }
+.stage:has(.lobby-main) > .players { flex: 0 0 220px; }
+.stage:has(.lobby-main) > .lobby-main { flex: 0 1 520px; min-width: 0; }
+.stage:has(.lobby-main) > .chat { flex: 0 0 260px; }
 
 /* align-self, not justify-self. The lobby column is flex, so justify-self is ignored
    and the code button would stretch to the full width of the panel. */
 .code {
   align-self: flex-start;
-  border: 1px dashed var(--teal);
-  background: #f0fdfa;
-  color: var(--teal-dark);
+  font-family: var(--display);
   font-size: 2rem;
   letter-spacing: 0.18em;
-  border-radius: 14px;
-  padding: 10px 16px;
+  color: var(--ink-deep);
+  background: var(--butter);
+  border-radius: var(--r-md);
+  padding: 4px 22px;
+  box-shadow: 0 5px 0 #e8c963, 0 10px 14px #e8c96355, var(--clay-inner-sm);
 }
+.code:active:not(:disabled) { box-shadow: 0 1px 0 #e8c963, var(--clay-inner-sm); }
 
 .summary { line-height: 1.5; }
 
@@ -280,6 +445,8 @@ input[type="text"], input[type="number"], input:not([type]) {
   gap: 10px;
 }
 
+/* Blanks and letters stay monospace on purpose: it keeps each underscore the same width
+   as a letter, so the word does not shift as hints are revealed. */
 .hintbar {
   text-align: center;
   min-height: 52px;
@@ -290,32 +457,35 @@ input[type="text"], input[type="number"], input:not([type]) {
 
 .hintbar p {
   font-family: "Courier New", ui-monospace, monospace;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #d94b86;
 }
 
 .hintbar.muted p {
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--display);
   letter-spacing: 0;
   text-transform: none;
-  font-size: 1.05rem;
-  color: var(--muted);
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ink-soft);
 }
 
-.hintbar small { color: var(--teal); }
+.hintbar small { color: var(--ink-soft); }
 
 /* The canvas fills this box. Overlays (word choice, round end) are positioned on top
-   so the canvas element is not unmounted when the phase changes. */
+   so the canvas element is not unmounted when the phase changes. The soft rim is a border,
+   not an inset shadow, because the canvas would paint over an inset shadow. */
 .canvas-wrap {
   position: relative;
   flex: 1;
   min-height: 220px;
   background: white;
-  border-radius: 16px;
-  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  border: 4px solid #f3eafa;
+  box-shadow: 0 8px 20px #5b4a6b26;
   overflow: hidden;
 }
 
@@ -333,22 +503,27 @@ canvas.drawable { cursor: crosshair; }
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 250, 243, 0.94);
+  background: #fbf7f0f0;
+  backdrop-filter: blur(4px);
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 20px;
   text-align: center;
 }
 
 .overlay h2, .reveal {
-  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-family: var(--display);
+  font-weight: 600;
   font-size: clamp(2rem, 4vw, 3.2rem);
   text-transform: capitalize;
 }
 
+.reveal { color: #e0568f; }
+
 .overlay-time {
+  font-family: var(--display);
   font-size: 1.4rem;
   font-variant-numeric: tabular-nums;
 }
@@ -356,20 +531,21 @@ canvas.drawable { cursor: crosshair; }
 .choices {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
   justify-content: center;
 }
 
 .choice {
-  border: 1px solid var(--line);
-  background: white;
-  border-radius: 999px;
-  padding: 12px 18px;
-  font-size: 1.15rem;
+  background: var(--butter);
+  font-size: 1.2rem;
+  padding: 10px 22px;
   text-transform: capitalize;
+  box-shadow: 0 5px 0 #5b4a6b33, 0 10px 14px #5b4a6b1a, var(--clay-inner-sm);
 }
-
-.choice:hover { border-color: var(--teal); color: var(--teal-dark); }
+.choice:nth-child(4n+2) { background: var(--mint); }
+.choice:nth-child(4n+3) { background: var(--sky); }
+.choice:nth-child(4n+4) { background: var(--lilac); }
+.choice:active:not(:disabled) { box-shadow: 0 1px 0 #5b4a6b33, var(--clay-inner-sm); }
 
 .scores {
   list-style: none;
@@ -384,35 +560,60 @@ canvas.drawable { cursor: crosshair; }
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  padding: 5px 14px;
+  background: #f3eafa;
+  border-radius: 12px;
 }
 
 /* Wraps onto a second row on a narrow board so the color dots are not clipped. */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
-.swatches, .sizes { display: flex; gap: 6px; flex-wrap: wrap; }
+.swatches, .sizes { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* Fill color comes from an inline style. Only the shape and the selected state live here. */
 .swatch {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  width: 32px;
+  height: 32px;
   padding: 0;
+  border-radius: 50%;
+  box-shadow: 0 4px 0 #5b4a6b33, var(--clay-inner-sm);
+}
+.swatch:hover:not(:disabled) { transform: translateY(-3px) scale(1.12); }
+
+.size {
+  background: #fff;
+  padding: 6px 14px;
+  box-shadow: 0 4px 0 #d9cbe6, var(--clay-inner-sm);
+}
+.size.on,
+.size.on:hover:not(:disabled) {
+  background: var(--butter);
+  transform: translateY(3px);
+  filter: none;
+  box-shadow: 0 1px 0 #e8c963, var(--clay-inner-sm);
 }
 
-.swatch.on, .size.on { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Listed after the hover rule so the selected swatch keeps its raised, ringed look. */
+.swatch.on,
+.swatch.on:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.2);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--pink-deep), 0 8px 12px #5b4a6b33;
+}
 
+/* ---------- chat ---------- */
 .messages {
   flex: 1;
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-height: 0;
+  padding-right: 6px;
 }
 
 .line, .system {
@@ -421,10 +622,16 @@ canvas.drawable { cursor: crosshair; }
   align-items: baseline;
   line-height: 1.35;
   overflow-wrap: anywhere;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 15px;
 }
 
-.system { color: var(--teal-dark); font-weight: 600; }
-.muted { color: var(--muted); }
+.line { background: #f3eafa; }
+
+/* System lines carry the news (someone guessed it, a round started), so they are mint. */
+.system { background: var(--mint); color: var(--good); }
+.muted { color: var(--ink-soft); }
 
 .chat form {
   display: grid;
@@ -432,28 +639,51 @@ canvas.drawable { cursor: crosshair; }
   gap: 8px;
 }
 
+/* Scrollbar styled to match. These are WebKit/Blink only; other browsers keep the default. */
+.messages::-webkit-scrollbar { width: 10px; }
+.messages::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 999px; }
+
+/* The toast is a button. It is centered with a transform, so the shared hover and press
+   transforms would knock it off center. Those states are pinned below. */
 .toast {
   position: fixed;
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
-  background: var(--ink);
-  color: white;
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 16px;
+  background: #fff;
+  color: var(--danger);
+  padding: 8px 22px;
+  font-size: 16px;
+  box-shadow: 0 10px 24px #5b4a6b33, var(--clay-inner-sm);
+}
+.toast:hover:not(:disabled), .toast:active:not(:disabled) {
+  transform: translateX(-50%);
+  filter: none;
+  box-shadow: 0 10px 24px #5b4a6b33, var(--clay-inner-sm);
 }
 
-.rejoining { font-size: 1.2rem; }
+.rejoining { font-family: var(--display); font-size: 1.6rem; }
 
 /* Under 980px the three columns stack. Side panels get a max height so the canvas
    is still on screen without scrolling past a long player list first. */
 @media (max-width: 980px) {
   .home { grid-template-columns: 1fr; padding: 28px 16px 40px; gap: 20px; }
   .hero h1 { font-size: 4.2rem; }
+  .hero::after { max-width: 380px; margin-top: 18px; }
   .shell { height: auto; min-height: 100vh; }
   .stage { grid-template-columns: 1fr; }
+  .stage:has(.lobby-main) { flex-direction: column; }
+  .stage:has(.lobby-main) > .players,
+  .stage:has(.lobby-main) > .lobby-main,
+  .stage:has(.lobby-main) > .chat { flex: none; width: 100%; max-width: 520px; }
   .players, .chat { max-height: 240px; }
   .canvas-wrap { min-height: 280px; }
+}
+
+/* People who ask their system for less motion get no bouncing or sliding buttons. */
+@media (prefers-reduced-motion: reduce) {
+  button, input, select { transition: none; }
+  button:hover:not(:disabled), button:active:not(:disabled) { transform: none; }
+  .swatch:hover:not(:disabled) { transform: none; }
 }

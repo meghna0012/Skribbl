@@ -1,4 +1,4 @@
-# Scribble
+# Skkribbl
 
 The reasoning behind the structure is in [DESIGN.md](DESIGN.md). Questions a walkthrough tends to ask, with answers, are in [QUESTIONS.md](QUESTIONS.md).
 

@@ -1,6 +1,6 @@
 # Design decisions
 
-Scribble is a private-room drawing and guessing game. One player draws a word. Everyone else tries to name it. The highest score after the last round wins.
+Skribbl is a private-room drawing and guessing game. One player draws a word. Everyone else tries to name it. The highest score after the last round wins.
 
 This file is the walkthrough of the decisions in the code: what we built, what else was on the table, and why this version won. The scope is the must-have and should-have features of a skribbl-style game: rooms, a lobby, drawing that stays in sync, word choice, guessing, scoring, brush tools, hints, chat, a draw-time clock, and invite links. Accounts, a public room list, an eraser, categories, kick, custom words, avatars, spectators, and replays were left out on purpose so the game stays something one person can explain end to end.
 

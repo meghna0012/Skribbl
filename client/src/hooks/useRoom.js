@@ -3,7 +3,7 @@ import { socket } from '../socket.js';
 
 // sessionStorage, not localStorage. A refresh in this tab should reclaim the seat.
 // A brand-new tab should not silently jump into yesterday's room.
-const SESSION_KEY = 'scribble-session';
+const SESSION_KEY = 'skribbl-session';
 
 // What: read the last seat this tab was in.
 // Why: the server identifies a reconnect by player id. The socket id is new after a refresh.
@@ -315,7 +315,7 @@ export function useRoom() {
   }, [state.error]);
 
   useEffect(() => {
-    document.title = state.roomId ? `Scribble · ${state.roomId}` : 'Scribble';
+    document.title = state.roomId ? ` · ${state.roomId}` : 'Skribbl';
   }, [state.roomId]);
 
   // What: send an event and surface the server's ack as a toast.

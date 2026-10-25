@@ -1,5 +1,5 @@
 {
-  "name": "scribble",
+  "name": "skribbl",
   "private": true,
   "workspaces": [
     "client",
