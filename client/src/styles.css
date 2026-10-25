@@ -110,7 +110,7 @@ button:active:not(:disabled) {
 }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.primary { background: var(--pink-deep); }
+.primary { background: var(--pink-deep); margin-top: 10px; }
 
 .ghost {
   background: #fff;
@@ -236,7 +236,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--pink-deep); }
 /* The two-tab switch on the home form. Selected looks pressed into the page. */
 .tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  /* Two or three tabs: the active Create or Join tab is not rendered, so fill the row. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -259,6 +261,36 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--pink-deep); }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+/* Create and Join submit buttons span the card and keep a comfortable tap height on phones. */
+.submit-btn {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 14px;
+  white-space: normal;
+}
+
+.form-error {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--danger);
+  background: #fff1f5;
+  border-radius: var(--r-sm);
+  box-shadow: inset 3px 3px 6px #ffffffcc, inset -2px -3px 6px #c93f6822;
+}
+
+input.invalid, input.invalid:focus {
+  box-shadow: inset 3px 4px 8px #c93f6833, 0 0 0 3px #c93f6866;
+}
+
+@media (max-width: 480px) {
+  .settings { grid-template-columns: 1fr; }
+  .tabs button { font-size: 14px; padding: 8px 10px; }
 }
 
 .settings .check {
@@ -419,7 +451,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--pink-deep); }
 .players li:nth-child(4n+4) { background: var(--sky); }
 
 .players li.away { opacity: 0.55; }
-
 /* Background color is set inline per player, so only the rim and the shadow are added here. */
 .avatar {
   width: 32px;

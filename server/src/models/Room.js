@@ -165,6 +165,19 @@ export class Room {
     if (ids.length < 2) {
       return { ok: false, error: 'Need at least 2 players' };
     }
+    // The host pressing Start counts as the host being ready. Everyone else who is
+    // connected must have pressed Ready. A disconnected seat cannot press it, so it
+    // is ignored here, the same way it is ignored for the 2-player minimum.
+    const waiting = this.connectedPlayers().filter(
+      (player) => player.id !== this.hostId && !player.ready,
+    );
+    if (waiting.length > 0) {
+      const names = waiting.map((player) => player.name);
+      const shown = names.length > 3
+        ? `${names.slice(0, 3).join(', ')} and ${names.length - 3} more`
+        : names.join(', ');
+      return { ok: false, error: `Waiting for ${shown} to be ready` };
+    }
     for (const player of this.players.values()) {
       player.score = 0;
       player.ready = false;

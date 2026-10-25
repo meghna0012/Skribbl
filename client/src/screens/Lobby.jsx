@@ -11,6 +11,11 @@ import { settingsLine } from '../format.js';
 export default function Lobby({ room }) {
   const [copied, setCopied] = useState(false);
   const me = room.players.find((player) => player.id === room.playerId);
+  // Same rule as the server: the host counts as ready, every other connected player must be.
+  const waitingFor = room.players.filter(
+    (player) => player.connected && player.id !== room.hostId && !player.ready,
+  );
+  const canStart = room.connectedCount >= 2 && waitingFor.length === 0;
 
   async function copyInvite() {
     const link = `${window.location.origin}/?room=${room.roomId}`;
@@ -48,28 +53,38 @@ export default function Lobby({ room }) {
             <p className="summary">{settingsLine(room.settings)}</p>
           )}
           <div className="lobby-actions">
-            <button
-              type="button"
-              className={me?.ready ? 'primary' : 'ghost'}
-              onClick={() => room.setReady(!me?.ready)}
-            >
-              {me?.ready ? 'Ready' : 'Not ready'}
-            </button>
+            {/* The host starts the game, which is their "ready", so they get no Ready button. */}
+            {!room.isHost && (
+              <button
+                type="button"
+                className={me?.ready ? 'primary' : 'ghost'}
+                onClick={() => room.setReady(!me?.ready)}
+              >
+                {me?.ready ? 'Ready' : 'Not ready'}
+              </button>
+            )}
             {room.isHost ? (
               <button
                 type="button"
                 className="primary"
-                disabled={room.connectedCount < 2}
+                disabled={!canStart}
                 onClick={room.startGame}
               >
                 Start game
               </button>
             ) : (
-              <p className="muted">Waiting for the host to start.</p>
+              <p className="muted">
+                {me?.ready ? 'Waiting for the host to start.' : 'Press Ready when you are set.'}
+              </p>
             )}
           </div>
           {room.isHost && room.connectedCount < 2 && (
             <p className="muted">Need at least 2 connected players to start.</p>
+          )}
+          {room.isHost && room.connectedCount >= 2 && waitingFor.length > 0 && (
+            <p className="muted">
+              Waiting for {waitingFor.map((player) => player.name).join(', ')} to be ready.
+            </p>
           )}
         </section>
         <Chat

@@ -176,9 +176,11 @@ A round in the settings is one pass through that order. Three rounds with four p
 
 `beginTurn` skips a missing seat, so a player who left during the five second gap does not stall the match on a drawer who is not connected.
 
-## 29. Why doesn't Ready block the start button?
+## 29. Does Ready block the start button, and what is the downside?
 
-The lobby shows ready because a waiting room needs a way to say "I'm here." Gating start on every ready flag means one person who does not notice the button holds the group. In a public matchmaking queue that gate is useful. In a private room the host is already the person everyone is waiting on. Start is still refused unless the host sends it and at least two players are connected. A disconnected seat does not count, so a ghost from the grace window cannot be the second player.
+Yes. `Room.startGame` refuses unless every connected player other than the host is ready, and returns an error that names up to three of the players it is waiting on. The client uses the same rule to disable Start and show the names, but the server is the one that enforces it, so a modified client cannot skip it. The host is treated as ready by pressing Start, so they have no Ready button. A disconnected seat is ignored, which means a ghost from the grace window cannot block a start and cannot be the second player either.
+
+The downside is deadlock: one connected player who never presses Ready holds the lobby, and the host cannot override it. We earlier chose not to gate for exactly that reason, then reversed it because an ungated Ready button was misleading. The missing fix is a host-side kick or a "start anyway" option.
 
 ## 30. Two tabs open the same room. What happens?
 

@@ -1,4 +1,4 @@
-const FIELDS = [
+export const FIELDS = [
   ['maxPlayers', 'Players', 2, 20],
   ['rounds', 'Rounds', 2, 10],
   ['drawTime', 'Draw time (seconds)', 15, 240],
@@ -8,7 +8,8 @@ const FIELDS = [
 
 // The same fields are used on the home screen (local state) and in the lobby (server state).
 // Min and max match the server clamps. The server still wins if these are bypassed.
-export default function SettingsForm({ settings, onChange, disabled }) {
+// `invalid` is a list of keys the parent found out of range, so they can be marked.
+export default function SettingsForm({ settings, onChange, disabled, invalid = [] }) {
   function update(key, value) {
     onChange({ ...settings, [key]: value });
   }
@@ -22,9 +23,15 @@ export default function SettingsForm({ settings, onChange, disabled }) {
             type="number"
             min={min}
             max={max}
-            value={settings[key]}
+            value={settings[key] === '' ? '' : settings[key]}
             disabled={disabled}
-            onChange={(event) => update(key, Number(event.target.value))}
+            aria-invalid={invalid.includes(key) || undefined}
+            className={invalid.includes(key) ? 'invalid' : undefined}
+            // Keep an emptied field as '' so it can be reported. Number('') would turn it into 0.
+            onChange={(event) => update(
+              key,
+              event.target.value === '' ? '' : Number(event.target.value),
+            )}
           />
         </label>
       ))}

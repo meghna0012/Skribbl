@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import SettingsForm from '../components/SettingsForm.jsx';
+import SettingsForm, { FIELDS } from '../components/SettingsForm.jsx';
 import { DEFAULT_SETTINGS } from '../constants.js';
 import { loadSession } from '../hooks/useRoom.js';
 
@@ -13,16 +13,52 @@ export default function Home({ room }) {
   ).toUpperCase());
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [mode, setMode] = useState(code ? 'join' : 'create');
+  // Messages stay hidden until the first Create click, so an untouched form is not red.
+  const [triedCreate, setTriedCreate] = useState(false);
+  const [triedJoin, setTriedJoin] = useState(false);
+  const [triedBrowse, setTriedBrowse] = useState(false);
+  // The name box is shared by all three tabs. Mark it once any tab was tried without a name.
+  const nameMissing = !name.trim() && (
+    (mode === 'create' && triedCreate)
+    || (mode === 'join' && triedJoin)
+    || (mode === 'browse' && triedBrowse)
+  );
+
+  // Empty or out-of-range fields, found before anything is sent. The server clamps too,
+  // but silently turning a blank "Rounds" into 2 would hide the mistake from the host.
+  const problems = [];
+  const invalidKeys = [];
+  if (!name.trim()) problems.push('Enter your name.');
+  for (const [key, label, min, max] of FIELDS) {
+    const value = settings[key];
+    const ok = value !== '' && Number.isInteger(value) && value >= min && value <= max;
+    if (!ok) {
+      invalidKeys.push(key);
+      problems.push(
+        value === ''
+          ? `${label} is empty. Enter a number from ${min} to ${max}.`
+          : `${label} must be a whole number from ${min} to ${max}.`,
+      );
+    }
+  }
 
   function create(event) {
     event.preventDefault();
-    if (!name.trim()) return;
+    setTriedCreate(true);
+    if (problems.length > 0) return;
     room.createRoom(name.trim(), settings);
   }
 
+  // Room codes are always 6 characters, so a shorter one can never match a room.
+  const joinProblems = [];
+  if (!name.trim()) joinProblems.push('Enter your name.');
+  if (code.length === 0) joinProblems.push('Enter a room code.');
+  else if (code.length < 6) joinProblems.push('Room codes are 6 characters. Check the code and try again.');
+
   function join(event) {
     event.preventDefault();
-    if (!name.trim() || code.length < 4) return;
+    setTriedJoin(true);
+    if (joinProblems.length > 0) return;
     room.joinRoom(name.trim(), code);
   }
 
@@ -30,7 +66,7 @@ export default function Home({ room }) {
     <main className="home">
       <section className="hero">
         <p className="eyebrow">Draw and guess</p>
-        <h1>Skribbl</h1>
+        <h1>Skribbl Test</h1>
         <p className="lede">
           One person draws. Everyone else races to name it. Create a room, join with a code, or pick an open room from Browse.
         </p>
@@ -42,55 +78,79 @@ export default function Home({ room }) {
             value={name}
             maxLength={16}
             placeholder="Ada"
+            className={nameMissing ? 'invalid' : undefined}
+            aria-invalid={nameMissing ? true : undefined}
             onChange={(event) => setName(event.target.value)}
           />
         </label>
         <div className="tabs" role="tablist">
-          <button type="button" className={mode === 'create' ? 'on' : ''} onClick={() => setMode('create')}>
-            Create
-          </button>
-          <button type="button" className={mode === 'join' ? 'on' : ''} onClick={() => setMode('join')}>
-            Join
-          </button>
-          <button
+          {/* The tab you are already on is hidden: clicking it would do nothing. */}
+          {mode !== 'create' && (
+            <button type="button" onClick={() => setMode('create')}>
+              Create
+            </button>
+          )}
+          {mode !== 'join' && (
+            <button type="button" onClick={() => setMode('join')}>
+              Join Via Code
+            </button>
+          )}
+          {mode !== 'browse' && (<button
             type="button"
-            className={mode === 'browse' ? 'on' : ''}
             onClick={() => {
               setMode('browse');
               room.refreshBrowse();
             }}
           >
             Browse rooms
-          </button>
+          </button>)}
         </div>
         {mode === 'create' ? (
-          <form onSubmit={create}>
-            <SettingsForm settings={settings} onChange={setSettings} />
-            <button className="primary" type="submit" disabled={room.busy || !name.trim()}>
+          <form onSubmit={create} noValidate>
+            <SettingsForm
+              settings={settings}
+              onChange={setSettings}
+              invalid={triedCreate ? invalidKeys : []}
+            />
+            {triedCreate && problems.length > 0 && (
+              <ul className="form-error" role="alert">
+                {problems.map((message) => <li key={message}>{message}</li>)}
+              </ul>
+            )}
+            <button className="primary submit-btn" type="submit" disabled={room.busy}>
               {room.busy ? 'Creating…' : 'Create room'}
             </button>
           </form>
         ) : mode === 'join' ? (
-          <form onSubmit={join}>
+          <form onSubmit={join} noValidate>
             <label>
               <span>Room code</span>
               <input
                 value={code}
                 placeholder="AB12CD"
+                className={triedJoin && code.length < 6 ? 'invalid' : undefined}
+                aria-invalid={triedJoin && code.length < 6 ? true : undefined}
                 onChange={(event) => {
                   setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6));
                 }}
               />
             </label>
-            <button className="primary" type="submit" disabled={room.busy || !name.trim() || code.length < 4}>
+            {triedJoin && joinProblems.length > 0 && (
+              <ul className="form-error" role="alert">
+                {joinProblems.map((message) => <li key={message}>{message}</li>)}
+              </ul>
+            )}
+            <button className="primary submit-btn" type="submit" disabled={room.busy}>
               {room.busy ? 'Joining…' : 'Join room'}
             </button>
           </form>
         ) : (
           <div className="browse">
-            {!name.trim() ? (
-              <p className="muted">Enter a name above, then join a room.</p>
-            ) : null}
+            {triedBrowse && !name.trim() && (
+              <ul className="form-error" role="alert">
+                <li>Enter your name above, then press Join.</li>
+              </ul>
+            )}
             {(room.browseRooms || []).length === 0 ? (
               <p className="muted">No open rooms right now. Create one, or join with a code.</p>
             ) : (
@@ -109,8 +169,12 @@ export default function Home({ room }) {
                     <button
                       type="button"
                       className="primary"
-                      disabled={room.busy || !name.trim()}
-                      onClick={() => room.joinRoom(name.trim(), row.roomId)}
+                      disabled={room.busy}
+                      onClick={() => {
+                        setTriedBrowse(true);
+                        if (!name.trim()) return;
+                        room.joinRoom(name.trim(), row.roomId);
+                      }}
                     >
                       {room.busy ? 'Joining…' : 'Join'}
                     </button>

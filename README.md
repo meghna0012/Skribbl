@@ -41,7 +41,7 @@ Which rooms appear in Browse:
 
 ### Lobby
 
-Everyone sees the player list. Ready is visible but does not block the start. The host edits settings and starts the game once at least two players are connected.
+Everyone sees the player list. Every connected non-host player must press **Ready** before the host can start. The host needs no Ready button, because pressing Start is their ready. The server enforces this and names who is still holding things up. A disconnected seat is ignored. The host also needs at least two connected players.
 
 Host settings, clamped again on the server: 2–20 players, 2–10 rounds, 15–240 s draw time, 1–5 word choices, 0–5 hints.
 
@@ -281,6 +281,7 @@ WebSockets work on Render web services without extra configuration. This is why 
 
 - **No accounts.** A player is a seat id in this tab's `sessionStorage`. Closing the tab for more than 20 seconds gives up the seat.
 - **Listed rooms are discoverable by anyone.** A room is listed by default and shows its host's name. There is no moderation, kick, ban or report, so a stranger can join a listed room and misbehave. Untick "List in Browse rooms" for anything you want private.
+- **One idle player can hold the lobby.** Start waits for every connected non-host player to be ready, and the host cannot override it. The only ways out are for that player to press Ready, leave, or drop off for 20 seconds.
 - **Browse list is capped and unpaged.** Only the newest 10 open rooms show. Older rooms are still joinable by code.
 - **In-progress games stay listed** while they have space. Late joiners can enter mid-round.
 - **Room list is broadcast to every connected socket,** including players already in a game. Fine at this scale. A dedicated "browsing" socket room would be the next step.

@@ -160,10 +160,10 @@ During choosing, the drawer cannot type a word option into chat. Otherwise they 
 
 - Reshuffle every round.
 - "Rounds" means "turns," so a 3-round game with 5 people is three drawings total.
-- The host's ready check blocks start.
+- Ready does not block start (the first version).
 - Anyone can return the room to the lobby.
 
-**Why this one.** Shuffling once means you can tell people "you'll draw after Ada" and it stays true. Reshuffling is fair in a different way and makes the order impossible to follow. Defining a round as a full cycle matches the way people talk about the game: everyone draws once per round. Ready is shown because the brief's lobby has a ready state, and it does not block start because a player who forgets to click it would stall the host for no gain in a private room. Start still requires the host and at least two connected players. Letting any player reset the match would let a sore loser end it.
+**Why this one.** Shuffling once means you can tell people "you'll draw after Ada" and it stays true. Reshuffling is fair in a different way and makes the order impossible to follow. Defining a round as a full cycle matches the way people talk about the game: everyone draws once per round. Ready gates the start: `Room.startGame` refuses unless every connected player other than the host has pressed Ready, and the error names who is missing. The first version did not gate it, because one player who forgets to click would stall the host. We changed it because a Ready button that does nothing is worse than a rule people can see, and because Browse puts strangers in the lobby, where "is everyone set" matters. The host counts as ready by pressing Start, so they get no Ready button. A disconnected seat is ignored, the same way it is for the two-player minimum, so a ghost in the 20 second grace window cannot block a start. The cost is the one we had before: an idle player can hold the lobby, and the host has no override. A kick or a host "start anyway" would fix that, and neither exists yet. Start still requires the host and at least two connected players. Letting any player reset the match would let a sore loser end it.
 
 `beginTurn` skips a seat that is gone, so a player who left during the 5 second gap does not trap the game on a drawer who is not there.
 
