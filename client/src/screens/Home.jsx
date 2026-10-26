@@ -66,7 +66,7 @@ export default function Home({ room }) {
     <main className="home">
       <section className="hero">
         <p className="eyebrow">Draw and guess</p>
-        <h1>Skribbl Test</h1>
+        <h1>Skribbl</h1>
         <p className="lede">
           One person draws. Everyone else races to name it. Create a room, join with a code, or pick an open room from Browse.
         </p>
